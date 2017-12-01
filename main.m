@@ -11,14 +11,45 @@ for i=1:size(folders, 1)
     main_loop([folders(i).folder, '/', folders(i).name], folders(i).name, threshold, alpha, gamma);
 end
 
+%different threshold on ArenaA
+folder = './DataSets/ArenaA';
+main_loop(folder, 'ArenaA_threshold_5', 5, alpha, gamma);
+main_loop(folder, 'ArenaA_threshold_100', 100, alpha, gamma);
+
+%different alpha on ArenaA
+folder = './DataSets/ArenaA';
+imgs = load_imgs(folder);
+alphas = [0 0.1 0.5 0.9 1];
+for i=1:size(alphas, 2)
+    result_ABG = ABG(imgs, threshold, alphas(i));
+    save(result_ABG, ['ArenaA_alpha_', sprintf('%f',alphas(i))]);
+end
+
+%different gamma on ArenaA
+folder = './DataSets/ArenaA';
+imgs = load_imgs(folder);
+gammas = [5 26 100];
+for i=1:size(gammas, 2)
+    result_PFD = PFD(imgs, threshold, gammas(i));
+    save(result_PFD, ['ArenaA_decay_', sprintf('%d',gammas(i))]);
+end
+
+
 %main_loop
 function main_loop(folder, dataset_name, threshold, alpha, gamma)
 
     imgs = load_imgs(folder);
 
+    %Simple Background Subtraction
     results_SBG = SBG(imgs, threshold);
+    
+    %Simple Frame Differencing
     results_SFD = SFD(imgs, threshold);
+    
+    %Adaptive Background Subtraction
     results_ABG = ABG(imgs, threshold, alpha);
+    
+    %Persistence Frame Differencing
     results_PFD = PFD(imgs, threshold, gamma);
 
     [m, n, o] = size(results_SBG);
